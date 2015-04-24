@@ -7,7 +7,7 @@ var PORT = process.env.PORT || 4567;
 var app = express();
 
 app.get('/', function (req, res) {
-  res.send('View README for details about using this api.');
+  res.send('View the README at https://github.com/nicinabox/saucer-api for details about using this api.');
 });
 
 app.get('/stores', function (req, res) {
