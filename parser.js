@@ -1,21 +1,38 @@
 var YQL = require('yql');
 var _ = require('lodash');
 
+var pool = require('./pool');
+var HOST = 'http://www.beerknurd.com';
+
+var url = function (endpoint) {
+  return HOST + endpoint;
+};
+
 var parser = {
   beerList: function (id, callback) {
-    var url = 'http://www.beerknurd.com/stores/' + id + '/beer';
-    var query = YQL("select * from html where url='" + url + "' and xpath='//select[@id=\"brews\"]/option'");
+    var endpoint = '/stores/' + id + '/beer';
+    var _url = url(endpoint);
+    var query = YQL("select * from html where url='" + _url + "' and xpath='//select[@id=\"brews\"]/option'");
 
-    return query.exec(function (err, resp) {
-      var _results = resp.query.results, results = {};
+    var parseResults = function (resp) {
+      var _results = resp.query.results;
 
       if (_results) {
-        results = _(_results.option).map(function (result) {
+        return _(_results.option).map(function (result) {
           return [result.value, result.content];
         }).object().value();
       }
+    }
 
-      callback(err, results);
+    pool.get(endpoint).then(function(resp) {
+      if (resp) {
+        callback(null, parseResults(resp));
+      } else {
+        query.exec(function (err, resp) {
+          pool.set(endpoint, resp);
+          callback(err, parseResults(resp));
+        });
+      }
     });
   },
 
