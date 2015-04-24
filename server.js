@@ -14,6 +14,7 @@ app.get('/stores', function (req, res) {
   parser.stores(function (err, results) {
     if (err) {
       console.log(err);
+      res.status(500).send(err);
     } else {
       res.send(results);
     }
@@ -24,6 +25,7 @@ app.get('/stores/:id/beers', function (req, res) {
   parser.beerList(req.params.id, function (err, results) {
     if (err) {
       console.log(err);
+      res.status(500).send(err);
     } else {
       res.send(results);
     }
@@ -34,6 +36,7 @@ app.get('/beers/:id', function (req, res) {
   parser.beer(req.params.id, function (err, results) {
     if (err) {
       console.log(err);
+      res.status(500).send(err);
     } else {
       res.send(results);
     }
