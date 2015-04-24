@@ -22,7 +22,7 @@ var parser = {
           return [result.value, result.content];
         }).object().value();
       }
-    }
+    };
 
     pool.get(endpoint).then(function(resp) {
       if (resp) {
@@ -37,26 +37,40 @@ var parser = {
   },
 
   beer: function (id, callback) {
-    var url = 'http://www.beerknurd.com/store.beers.process.php?brew=' + id;
-    var query = YQL("select * from html where url='" + url + "' and xpath='//div[@id=\"brew_detail_div\"]/table//tr'");
+    var endpoint = '/store.beers.process.php?brew=' + id;
+    var _url = url(endpoint);
+    var query = YQL("select * from html where url='" + _url + "' and xpath='//div[@id=\"brew_detail_div\"]/table//tr'");
 
-    query.exec(function (err, resp) {
-      var _results = resp.query.results, results = {};
+    var parseResults = function (resp) {
+      var results = {},
+          _results = resp.query.results;
 
       if (_results) {
-        var title = _results.tr.splice(0, 1);
-
         results = _(_results.tr).map(function (row) {
-          return [
-            row.td[0].replace(/:\s?$/, '').toLowerCase(),
-            row.td[1]
-          ];
-        }).object().value();
+          if (_.isArray(row.td)) {
+            return [
+              row.td[0].replace(/:\s?$/, '').toLowerCase(),
+              row.td[1]
+            ];
+          }
+        }).compact().object().value();
 
-        results.title = title[0].td.h3;
+        var title = _results.tr[0];
+        results.title = title.td.h3;
+
+        return results;
       }
+    };
 
-      callback(err, results);
+    pool.get(endpoint).then(function(resp) {
+      if (resp) {
+        callback(null, parseResults(resp));
+      } else {
+        query.exec(function (err, resp) {
+          pool.set(endpoint, resp);
+          callback(err, parseResults(resp));
+        });
+      }
     });
   },
 
