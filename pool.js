@@ -1,6 +1,6 @@
 var RSVP = require('rsvp');
 
-var CACHE_MINTUES = 60 * 12;
+var CACHE_MINUTES = 60 * 12;
 
 var keys = {};
 var store = {};
@@ -8,7 +8,7 @@ var store = {};
 var pool = {
   set: function (key, value) {
     var date = new Date();
-    date.setMinutes(date.getMinutes() + CACHE_MINTUES);
+    date.setMinutes(date.getMinutes() + CACHE_MINUTES);
 
     keys[key] = {
       expires: date.getTime()
