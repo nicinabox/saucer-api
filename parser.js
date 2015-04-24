@@ -75,21 +75,31 @@ var parser = {
   },
 
   stores: function (callback) {
-    var url = 'http://www.beerknurd.com/stores';
-    var query = YQL("select * from html where url='" + url + "' and xpath='//map/area'");
+    var endpoint = '/stores';
+    var _url = url(endpoint);
+    var query = YQL("select * from html where url='" + _url + "' and xpath='//map/area'");
 
-    query.exec(function (err, resp) {
-      var _results = resp.query.results, results = {};
+    var parseResults = function (resp) {
+      var _results = resp.query.results;
 
       if (_results) {
-        results = _(_results.area).map(function (row) {
+        return _(_results.area).map(function (row) {
           var slug = row.href.replace(/\/$/, '');
           var title = row.title.replace('Flying Saucer - ', '');
           return [slug, title];
         }).object().value();
       }
+    };
 
-      callback(err, results);
+    pool.get(endpoint).then(function(resp) {
+      if (resp) {
+        callback(null, parseResults(resp));
+      } else {
+        query.exec(function (err, resp) {
+          pool.set(endpoint, resp);
+          callback(err, parseResults(resp));
+        });
+      }
     });
   }
 }
