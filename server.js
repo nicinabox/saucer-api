@@ -16,7 +16,11 @@ app.get('/stores', function (req, res) {
       console.log(err);
       res.status(500).send(err);
     } else {
-      res.send(results);
+      var locations = _(results).map(function(v, k) {
+        return { slug: k, name: v };
+      }).sortBy('name').value();
+
+      res.send(locations);
     }
   });
 });
@@ -27,7 +31,11 @@ app.get('/stores/:id/beers', function (req, res) {
       console.log(err);
       res.status(500).send(err);
     } else {
-      res.send(results);
+      var beers = _(results).map(function(v, k) {
+        return { id: k, name: v };
+      }).sortBy('name').value();
+
+      res.send(beers);
     }
   });
 });
