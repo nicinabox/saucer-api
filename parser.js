@@ -2,8 +2,8 @@ var YQL = require('yql');
 var _ = require('lodash');
 
 var parser = {
-  beerList: function (slug, callback) {
-    var url = 'http://www.beerknurd.com/stores/' + slug + '/beer';
+  beerList: function (id, callback) {
+    var url = 'http://www.beerknurd.com/stores/' + id + '/beer';
     var query = YQL("select * from html where url='" + url + "' and xpath='//select[@id=\"brews\"]/option'");
 
     return query.exec(function (err, resp) {

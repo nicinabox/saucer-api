@@ -18,8 +18,8 @@ app.get('/stores', function (req, res) {
   });
 });
 
-app.get('/stores/:slug/beer', function (req, res) {
-  parser.beerList(req.params.slug, function (err, results) {
+app.get('/stores/:id/beers', function (req, res) {
+  parser.beerList(req.params.id, function (err, results) {
     if (err) {
       console.log(err);
     } else {
@@ -28,7 +28,7 @@ app.get('/stores/:slug/beer', function (req, res) {
   });
 });
 
-app.get('/beer/:id', function (req, res) {
+app.get('/beers/:id', function (req, res) {
   parser.beer(req.params.id, function (err, results) {
     if (err) {
       console.log(err);
