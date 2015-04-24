@@ -1,4 +1,4 @@
-var RSVP = require('RSVP');
+var RSVP = require('rsvp');
 
 var CACHE_MINTUES = 60 * 12;
 
