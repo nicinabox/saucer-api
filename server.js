@@ -2,6 +2,8 @@ var express = require('express');
 var _ = require('lodash');
 var parser = require('./parser');
 
+var PORT = process.env.PORT || 4567;
+
 var app = express();
 
 app.get('/', function (req, res) {
@@ -38,7 +40,7 @@ app.get('/beers/:id', function (req, res) {
   });
 });
 
-var server = app.listen(4567, function () {
+var server = app.listen(PORT, function () {
   var host = server.address().address;
   var port = server.address().port;
 
