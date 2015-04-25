@@ -1,5 +1,9 @@
 var express = require('express');
 var _ = require('lodash');
+var geocoder = require('node-geocoder')('openstreetmap', 'http', {});
+var RSVP = require('rsvp');
+
+var pool = require('./pool');
 var parser = require('./parser');
 
 var PORT = process.env.PORT || 4567;
@@ -11,16 +15,27 @@ app.get('/', function (req, res) {
 });
 
 app.get('/stores', function (req, res) {
+  pool.get('geocoded-stores').then(function (results) {
+    if (results) {
+      res.send(results);
+    }
+  });
+
   parser.stores(function (err, results) {
     if (err) {
       console.log(err);
       res.status(500).send(err);
     } else {
-      var locations = _(results).map(function(v, k) {
-        return { slug: k, name: v };
-      }).sortBy('name').value();
+      var promises = _.map(results, function (location) {
+        return geocoder.geocode(location.name).then(function (resp) {
+          location.location = resp[0];
+        });
+      });
 
-      res.send(locations);
+      RSVP.all(promises).then(function () {
+        pool.set('geocoded-stores', results)
+        res.send(results);
+      });
     }
   });
 });

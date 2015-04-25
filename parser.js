@@ -85,9 +85,9 @@ var parser = {
       if (_results) {
         return _(_results.area).map(function (row) {
           var slug = row.href.replace(/\/$/, '');
-          var title = row.title.replace('Flying Saucer - ', '');
-          return [slug, title];
-        }).object().value();
+          var name = row.title.replace('Flying Saucer - ', '');
+          return { slug: slug, name: name };
+        }).sortBy('name').value();
       }
     };
 
