@@ -1,6 +1,6 @@
 var RSVP = require('rsvp');
 
-var CACHE_MINUTES = 60 * 12;
+var CACHE_MINUTES = 60 * 24;
 
 var keys = {};
 var store = {};
