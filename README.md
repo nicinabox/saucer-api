@@ -24,6 +24,15 @@ Returns all current beers for a store.
 
 Returns details for a single beer.
 
+## Contributing
+
+Something missing? Think you could do it better? Contributions welcome!
+
+* Do something cool on a feature branch
+* Probably test it or something
+* Take care to follow the existing style
+* Send a pull request
+
 ## TODO
 
 * [ ] Firesale beers, but unfortunately I don't think this data is published anywhere
