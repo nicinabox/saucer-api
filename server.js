@@ -1,6 +1,6 @@
 var express = require('express');
 var _ = require('lodash');
-var geocoder = require('node-geocoder')('openstreetmap', 'http', {});
+var geolib = require('geolib');
 var RSVP = require('rsvp');
 
 var pool = require('./pool');
@@ -14,30 +14,33 @@ app.get('/', function (req, res) {
   res.send('View the README at https://github.com/nicinabox/saucer-api for details about using this api.');
 });
 
-app.get('/stores', function (req, res) {
-  pool.get('geocoded-stores').then(function (results) {
-    if (results) {
-      res.send(results);
-    } else {
-      parser.stores()
-        .then(function (results) {
-          var promises = _.map(results, function (location) {
-            return geocoder.geocode(location.name).then(function (resp) {
-              location.location = resp[0];
-            });
-          });
+app.get('/nearby', function (req, res) {
+  var coords = req.query;
 
-          RSVP.all(promises).then(function () {
-            pool.set('geocoded-stores', results);
-            res.send(results);
-          });
-        })
-        .catch(function (err) {
-          res.status(500).send(err);
-        });
-    }
+  if (_.isEmpty(coords)) {
+    res.status(400).send('You must specify latitude and logitude.');
+  }
+
+  parser.geocodedStores().then(function (results) {
+    var locations = _(results).map(function (store) {
+      store.distance = geolib.getDistance(store.location, coords);
+      return store;
+    }).sortBy('distance').slice(0, 1);
+
+    res.send(locations);
+  })
+  .catch(function (err) {
+    res.status(500);
   });
+});
 
+app.get('/stores', function (req, res) {
+  parser.geocodedStores().then(function (results) {
+    res.send(results);
+  })
+  .catch(function (err) {
+    res.status(500);
+  });
 });
 
 app.get('/stores/:id/beers', function (req, res) {

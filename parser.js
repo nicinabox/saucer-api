@@ -1,6 +1,7 @@
 var YQL = require('yql');
 var _ = require('lodash');
 var RSVP = require('rsvp');
+var geocoder = require('node-geocoder')('openstreetmap', 'http', {});
 
 var pool = require('./pool');
 var HOST = 'http://www.beerknurd.com';
@@ -98,7 +99,28 @@ var parser = {
     return getResults(query, endpoint).then(function (resp) {
       return parseResults(resp);
     });
+  },
+
+  geocodedStores: function () {
+    return pool.get('geocoded-stores').then(function (results) {
+      if (results) {
+        return results;
+      } else {
+        return this.stores().then(function (results) {
+          var promises = _.map(results, function (location) {
+            return geocoder.geocode(location.name).then(function (resp) {
+              location.location = resp[0];
+            });
+          });
+
+          return RSVP.all(promises).then(function () {
+            pool.set('geocoded-stores', results);
+            return results;
+          })
+        });
+      }
+    }.bind(this));
   }
-}
+};
 
 module.exports = parser;

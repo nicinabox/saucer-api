@@ -15,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.12.3",
+    "geolib": "^2.0.14",
     "lodash": "^3.7.0",
     "node-geocoder": "^2.20.0",
     "rsvp": "^3.0.18",
