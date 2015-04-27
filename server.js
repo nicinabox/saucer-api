@@ -21,13 +21,19 @@ app.get('/nearby', function (req, res) {
     res.status(400).send('You must specify latitude and logitude.');
   }
 
-  parser.geocodedStores().then(function (results) {
-    var locations = _(results).map(function (store) {
-      store.distance = geolib.getDistance(store.location, coords);
-      return store;
-    }).sortBy('distance').slice(0, 1);
+  parser.getGeocodedStores().then(function (results) {
+    var lastDistance = 99999999;
+    var closest = {};
 
-    res.send(locations);
+    _.map(results, function (store) {
+      var distance = geolib.getDistance(store.location, coords);
+      if (distance < lastDistance) {
+        lastDistance = distance;
+        closest = store;
+      }
+    });
+
+    res.send(closest);
   })
   .catch(function (err) {
     res.status(500);
@@ -35,7 +41,7 @@ app.get('/nearby', function (req, res) {
 });
 
 app.get('/stores', function (req, res) {
-  parser.geocodedStores().then(function (results) {
+  parser.getGeocodedStores().then(function (results) {
     res.send(results);
   })
   .catch(function (err) {
@@ -44,7 +50,7 @@ app.get('/stores', function (req, res) {
 });
 
 app.get('/stores/:id/beers', function (req, res) {
-  parser.beerList(req.params.id)
+  parser.getBeerList(req.params.id)
     .then(function (results) {
       var beers = _(results).map(function(v, k) {
         return { id: k, name: v };
@@ -58,7 +64,7 @@ app.get('/stores/:id/beers', function (req, res) {
 });
 
 app.get('/beers/:id', function (req, res) {
-  parser.beer(req.params.id)
+  parser.getBeer(req.params.id)
     .then(function (results) {
       res.send(results);
     }).catch(function (err) {

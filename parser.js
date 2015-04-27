@@ -31,7 +31,7 @@ var getResults = function (query, endpoint) {
 };
 
 var parser = {
-  beerList: function (id) {
+  getBeerList: function (id) {
     var endpoint = '/stores/' + id + '/beer';
     var query = YQL("select * from html where url='" + url(endpoint) + "' and xpath='//select[@id=\"brews\"]/option'");
 
@@ -50,7 +50,7 @@ var parser = {
     });
   },
 
-  beer: function (id, callback) {
+  getBeer: function (id, callback) {
     var endpoint = '/store.beers.process.php?brew=' + id;
     var query = YQL("select * from html where url='" + url(endpoint) + "' and xpath='//div[@id=\"brew_detail_div\"]/table//tr'");
 
@@ -80,7 +80,7 @@ var parser = {
     });
   },
 
-  stores: function (callback) {
+  getStores: function (callback) {
     var endpoint = '/stores';
     var query = YQL("select * from html where url='" + url(endpoint) + "' and xpath='//map/area'");
 
@@ -101,12 +101,12 @@ var parser = {
     });
   },
 
-  geocodedStores: function () {
-    return pool.get('geocoded-stores').then(function (results) {
-      if (results) {
-        return results;
+  getGeocodedStores: function () {
+    return pool.get('geocoded-stores').then(function (cache) {
+      if (cache) {
+        return cache;
       } else {
-        return this.stores().then(function (results) {
+        return this.getStores().then(function (results) {
           var promises = _.map(results, function (location) {
             return geocoder.geocode(location.name).then(function (resp) {
               location.location = resp[0];
@@ -116,7 +116,7 @@ var parser = {
           return RSVP.all(promises).then(function () {
             pool.set('geocoded-stores', results);
             return results;
-          })
+          });
         });
       }
     }.bind(this));
