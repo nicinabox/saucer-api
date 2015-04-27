@@ -23,3 +23,9 @@ Returns all current beers for a store.
 `/beers/:id`
 
 Returns details for a single beer.
+
+## TODO
+
+* [ ] Firesale beers, but unfortunately I don't think this data is published anywhere
+* [ ] UFO club auth
+* [ ] UFO club tasted beers
