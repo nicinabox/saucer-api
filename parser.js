@@ -75,9 +75,11 @@ var parser = {
       var results = {},
           _results = resp.query.results;
 
+      var falsey = ['None', 'n/a', 'unassigned', ''];
+
       if (_results) {
         results = _(_results.tr).map(function (row) {
-          if (_.isArray(row.td)) {
+          if (_.isArray(row.td) && !_.contains(falsey, row.td[1])) {
             return [
               row.td[0].replace(/:\s?$/, '').toLowerCase(),
               row.td[1]
