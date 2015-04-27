@@ -52,11 +52,7 @@ app.get('/stores', function (req, res) {
 app.get('/stores/:id/beers', function (req, res) {
   parser.getBeerList(req.params.id)
     .then(function (results) {
-      var beers = _(results).map(function(v, k) {
-        return { id: k, name: v };
-      }).sortBy('name').value();
-
-      res.send(beers);
+      res.send(results);
     })
     .catch(function (err) {
       res.status(500).send(err);

@@ -10,6 +10,12 @@ var url = function (endpoint) {
   return HOST + endpoint;
 };
 
+var containers = {
+  BTL: 'bottle',
+  CAN: 'can',
+  CASK: 'cask',
+};
+
 var getResults = function (query, endpoint) {
   return new RSVP.Promise(function (resolve, reject) {
     pool.get(endpoint).then(function(cache) {
@@ -40,8 +46,19 @@ var parser = {
 
       if (results) {
         return _(results.option).map(function (result) {
-          return [result.value, result.content];
-        }).object().value();
+          var name = result.content;
+          var match = result.content.match(/\((.*)\)/);
+          if (match) {
+            var container = containers[match[1]] || match[1];
+            name = name.replace(match[0], '').trim();
+          }
+
+          return {
+            id: result.value,
+            name: name,
+            container: container
+          };
+        }).sortBy('name').value();
       }
     };
 
