@@ -1,5 +1,6 @@
 var YQL = require('yql');
 var _ = require('lodash');
+var RSVP = require('rsvp');
 
 var pool = require('./pool');
 var HOST = 'http://www.beerknurd.com';
@@ -8,38 +9,49 @@ var url = function (endpoint) {
   return HOST + endpoint;
 };
 
+var getResults = function (query, endpoint) {
+  return new RSVP.Promise(function (resolve, reject) {
+    pool.get(endpoint).then(function(cache) {
+      if (cache) {
+        resolve(cache);
+      } else {
+        query.exec(function (err, resp) {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          pool.set(endpoint, resp);
+          resolve(resp);
+        });
+      }
+    });
+  });
+};
+
 var parser = {
-  beerList: function (id, callback) {
+  beerList: function (id) {
     var endpoint = '/stores/' + id + '/beer';
-    var _url = url(endpoint);
-    var query = YQL("select * from html where url='" + _url + "' and xpath='//select[@id=\"brews\"]/option'");
+    var query = YQL("select * from html where url='" + url(endpoint) + "' and xpath='//select[@id=\"brews\"]/option'");
 
     var parseResults = function (resp) {
-      var _results = resp.query.results;
+      var results = resp.query.results;
 
-      if (_results) {
-        return _(_results.option).map(function (result) {
+      if (results) {
+        return _(results.option).map(function (result) {
           return [result.value, result.content];
         }).object().value();
       }
     };
 
-    pool.get(endpoint).then(function(resp) {
-      if (resp) {
-        callback(null, parseResults(resp));
-      } else {
-        query.exec(function (err, resp) {
-          pool.set(endpoint, resp);
-          callback(err, parseResults(resp));
-        });
-      }
+    return getResults(query, endpoint).then(function (resp) {
+      return parseResults(resp);
     });
   },
 
   beer: function (id, callback) {
     var endpoint = '/store.beers.process.php?brew=' + id;
-    var _url = url(endpoint);
-    var query = YQL("select * from html where url='" + _url + "' and xpath='//div[@id=\"brew_detail_div\"]/table//tr'");
+    var query = YQL("select * from html where url='" + url(endpoint) + "' and xpath='//div[@id=\"brew_detail_div\"]/table//tr'");
 
     var parseResults = function (resp) {
       var results = {},
@@ -62,28 +74,20 @@ var parser = {
       }
     };
 
-    pool.get(endpoint).then(function(resp) {
-      if (resp) {
-        callback(null, parseResults(resp));
-      } else {
-        query.exec(function (err, resp) {
-          pool.set(endpoint, resp);
-          callback(err, parseResults(resp));
-        });
-      }
+    return getResults(query, endpoint).then(function (resp) {
+      return parseResults(resp);
     });
   },
 
   stores: function (callback) {
     var endpoint = '/stores';
-    var _url = url(endpoint);
-    var query = YQL("select * from html where url='" + _url + "' and xpath='//map/area'");
+    var query = YQL("select * from html where url='" + url(endpoint) + "' and xpath='//map/area'");
 
     var parseResults = function (resp) {
-      var _results = resp.query.results;
+      var results = resp.query.results;
 
-      if (_results) {
-        return _(_results.area).map(function (row) {
+      if (results) {
+        return _(results.area).map(function (row) {
           var slug = row.href.replace(/\/$/, '');
           var name = row.title.replace('Flying Saucer - ', '');
           return { slug: slug, name: name };
@@ -91,15 +95,8 @@ var parser = {
       }
     };
 
-    pool.get(endpoint).then(function(resp) {
-      if (resp) {
-        callback(null, parseResults(resp));
-      } else {
-        query.exec(function (err, resp) {
-          pool.set(endpoint, resp);
-          callback(err, parseResults(resp));
-        });
-      }
+    return getResults(query, endpoint).then(function (resp) {
+      return parseResults(resp);
     });
   }
 }

@@ -18,52 +18,49 @@ app.get('/stores', function (req, res) {
   pool.get('geocoded-stores').then(function (results) {
     if (results) {
       res.send(results);
-    }
-  });
-
-  parser.stores(function (err, results) {
-    if (err) {
-      console.log(err);
-      res.status(500).send(err);
     } else {
-      var promises = _.map(results, function (location) {
-        return geocoder.geocode(location.name).then(function (resp) {
-          location.location = resp[0];
-        });
-      });
+      parser.stores()
+        .then(function (results) {
+          var promises = _.map(results, function (location) {
+            return geocoder.geocode(location.name).then(function (resp) {
+              location.location = resp[0];
+            });
+          });
 
-      RSVP.all(promises).then(function () {
-        pool.set('geocoded-stores', results)
-        res.send(results);
-      });
+          RSVP.all(promises).then(function () {
+            pool.set('geocoded-stores', results);
+            res.send(results);
+          });
+        })
+        .catch(function (err) {
+          res.status(500).send(err);
+        });
     }
   });
+
 });
 
 app.get('/stores/:id/beers', function (req, res) {
-  parser.beerList(req.params.id, function (err, results) {
-    if (err) {
-      console.log(err);
-      res.status(500).send(err);
-    } else {
+  parser.beerList(req.params.id)
+    .then(function (results) {
       var beers = _(results).map(function(v, k) {
         return { id: k, name: v };
       }).sortBy('name').value();
 
       res.send(beers);
-    }
-  });
+    })
+    .catch(function (err) {
+      res.status(500).send(err);
+    });
 });
 
 app.get('/beers/:id', function (req, res) {
-  parser.beer(req.params.id, function (err, results) {
-    if (err) {
-      console.log(err);
-      res.status(500).send(err);
-    } else {
+  parser.beer(req.params.id)
+    .then(function (results) {
       res.send(results);
-    }
-  });
+    }).catch(function (err) {
+      res.status(500).send(err);
+    });
 });
 
 var server = app.listen(PORT, function () {
