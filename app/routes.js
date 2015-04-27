@@ -6,15 +6,13 @@ var RSVP = require('rsvp');
 var pool = require('./pool');
 var parser = require('./parser');
 
-var PORT = process.env.PORT || 4567;
+var router = express.Router();
 
-var app = express();
-
-app.get('/', function (req, res) {
+router.get('/', function (req, res) {
   res.send('View the README at https://github.com/nicinabox/saucer-api for details about using this api.');
 });
 
-app.get('/nearby', function (req, res) {
+router.get('/nearby', function (req, res) {
   var coords = req.query;
 
   if (_.isEmpty(coords)) {
@@ -40,7 +38,7 @@ app.get('/nearby', function (req, res) {
   });
 });
 
-app.get('/stores', function (req, res) {
+router.get('/stores', function (req, res) {
   parser.getGeocodedStores().then(function (results) {
     res.send(results);
   })
@@ -49,7 +47,7 @@ app.get('/stores', function (req, res) {
   });
 });
 
-app.get('/stores/:id/beers', function (req, res) {
+router.get('/stores/:id/beers', function (req, res) {
   parser.getBeerList(req.params.id)
     .then(function (results) {
       res.send(results);
@@ -59,7 +57,7 @@ app.get('/stores/:id/beers', function (req, res) {
     });
 });
 
-app.get('/beers/:id', function (req, res) {
+router.get('/beers/:id', function (req, res) {
   parser.getBeer(req.params.id)
     .then(function (results) {
       res.send(results);
@@ -68,10 +66,4 @@ app.get('/beers/:id', function (req, res) {
     });
 });
 
-var server = app.listen(PORT, function () {
-  var host = server.address().address;
-  var port = server.address().port;
-
-  console.log('Listening at http://%s:%s', host, port);
-
-});
+module.exports = router;
