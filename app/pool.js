@@ -6,7 +6,7 @@ var keys = {};
 var store = {};
 
 var pool = {
-  set: function (key, value) {
+  set: (key, value) => {
     var date = new Date();
     date.setMinutes(date.getMinutes() + CACHE_MINUTES);
 
@@ -17,11 +17,11 @@ var pool = {
     store[key] = value;
   },
 
-  get: function (key) {
+  get: (key) => {
     var timestamp = new Date().getTime();
     var item = keys[key];
 
-    return new RSVP.Promise(function (resolve) {
+    return new RSVP.Promise((resolve) => {
       if (!item) {
         resolve();
         return;
@@ -36,12 +36,12 @@ var pool = {
     });
   },
 
-  remove: function (key) {
+  remove: (key) => {
     this.expire(key);
     delete store[key];
   },
 
-  expire: function (key) {
+  expire: (key) => {
     delete keys[key];
   },
 };
