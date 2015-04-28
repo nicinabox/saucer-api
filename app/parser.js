@@ -113,11 +113,11 @@ var parser = {
   },
 
   getGeocodedStores: () => {
-    return pool.get('geocoded-stores').then((cache) => {
+    return pool.get('geocoded-stores').then(function(cache) {
       if (cache) {
         return cache;
       } else {
-        return parser.getStores().then((results) => {
+        return this.getStores().then((results) => {
           var promises = _.map(results, (location) => {
             return geocoder.geocode(location.name).then((resp) => {
               location.location = resp[0];
@@ -130,7 +130,7 @@ var parser = {
           });
         });
       }
-    });
+    }.bind(this));
   }
 };
 
