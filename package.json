@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "watch": "nodemon index.js"
+    "start": "node --harmony index.js",
+    "watch": "nodemon --harmony index.js"
   },
   "engines": {
-    "node": "0.10.x"
+    "node": "0.12.x"
   },
   "author": "",
   "license": "ISC",
