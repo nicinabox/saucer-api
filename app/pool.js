@@ -1,3 +1,5 @@
+'use strict';
+
 var RSVP = require('rsvp');
 
 var CACHE_MINUTES = 60 * 24;

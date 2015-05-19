@@ -1,9 +1,9 @@
+'use strict';
+
 var express = require('express');
 var _ = require('lodash');
 var geolib = require('geolib');
-var RSVP = require('rsvp');
 
-var pool = require('./pool');
 var parser = require('./parser');
 
 var router = express.Router();

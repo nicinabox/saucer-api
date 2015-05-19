@@ -1,3 +1,5 @@
+'use strict';
+
 var YQL = require('yql');
 var _ = require('lodash');
 var RSVP = require('rsvp');
