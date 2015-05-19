@@ -38,3 +38,4 @@ Something missing? Think you could do it better? Contributions welcome!
 * [ ] Firesale beers, but unfortunately I don't think this data is published anywhere
 * [ ] UFO club auth
 * [ ] UFO club tasted beers
+* [ ] New beers this week
