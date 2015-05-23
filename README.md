@@ -24,6 +24,11 @@ Returns all current beers for a store.
 
 Returns details for a single beer.
 
+## Projects using this API
+
+* [What should I fucking drink tonight?](http://whatshouldifuckingdrinktonight.com/)
+* [Saucer iOS app (unpublished)](https://github.com/nicinabox/Saucer)
+
 ## Contributing
 
 Something missing? Think you could do it better? Contributions welcome!
