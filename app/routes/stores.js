@@ -18,8 +18,8 @@ var stores = [
     reply('Did you mean "/stores/' + req.params.id + '/beers"?');
   }),
 
-  router.get('/stores/{id}/beers', function (req, reply) {
-    parser.getBeerList(req.params.id)
+  router.get('/stores/{slug}/beers', function (req, reply) {
+    parser.getBeerList(req.params.slug)
     .then(function (results) {
       reply(results);
     })

@@ -16,7 +16,7 @@ Returns the closest store location.
 
 Returns a list of store locations.
 
-`/stores/:id/beers`
+`/stores/:slug/beers`
 
 Returns all current beers for a store.
 
