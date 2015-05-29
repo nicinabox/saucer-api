@@ -56,8 +56,7 @@ var parser = {
           return {
             id: result.value,
             name: name,
-            container: container,
-            createdOn: new Date().toString(),
+            container: container
           };
         }).sortBy('name').value();
       }
@@ -66,7 +65,7 @@ var parser = {
     return getResults(query, endpoint).then((resp) => parseResults(resp));
   },
 
-  getBeer: (id, callback) => {
+  getBeer: (id) => {
     var endpoint = '/store.beers.process.php?brew=' + id;
     var query = YQL("select * from html where url='" + url(endpoint) + "' and xpath='//div[@id=\"brew_detail_div\"]/table//tr'");
 
@@ -96,7 +95,7 @@ var parser = {
     return getResults(query, endpoint).then((resp) => parseResults(resp));
   },
 
-  getStores: (callback) => {
+  getStores: () => {
     var endpoint = '/stores';
     var query = YQL("select * from html where url='" + url(endpoint) + "' and xpath='//map/area'");
 
