@@ -1,14 +1,11 @@
 'use strict';
 
-var YQL = require('yql');
 var _ = require('lodash');
 var RSVP = require('rsvp');
 var geocoder = require('node-geocoder')('openstreetmap', 'http', {});
 
 var pool = require('./pool');
-var HOST = 'http://www.beerknurd.com';
-
-var url = (endpoint) => HOST + endpoint;
+var scrape = require('./scrape');
 
 var containers = {
   BTL: 'bottle',
@@ -16,30 +13,10 @@ var containers = {
   CASK: 'cask',
 };
 
-var getResults = (query, endpoint) => {
-  return new RSVP.Promise((resolve, reject) => {
-    pool.get(endpoint).then((cache) => {
-      if (cache) {
-        resolve(cache);
-      } else {
-        query.exec((err, resp) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-
-          pool.set(endpoint, resp);
-          resolve(resp);
-        });
-      }
-    });
-  });
-};
-
 var parser = {
   getBeerList: (id) => {
     var endpoint = '/stores/' + id + '/beer';
-    var query = YQL("select * from html where url='" + url(endpoint) + "' and xpath='//select[@id=\"brews\"]/option'");
+    var xpath = '//select[@id="brews"]/option';
 
     var parseResults = (resp) => {
       var results = resp.query.results;
@@ -62,12 +39,12 @@ var parser = {
       }
     };
 
-    return getResults(query, endpoint).then((resp) => parseResults(resp));
+    return scrape(endpoint, xpath).then(parseResults);
   },
 
   getBeer: (id) => {
     var endpoint = '/store.beers.process.php?brew=' + id;
-    var query = YQL("select * from html where url='" + url(endpoint) + "' and xpath='//div[@id=\"brew_detail_div\"]/table//tr'");
+    var xpath = '//div[@id="brew_detail_div"]/table//tr';
 
     var parseResults = (resp) => {
       var results = {},
@@ -92,12 +69,12 @@ var parser = {
       }
     };
 
-    return getResults(query, endpoint).then((resp) => parseResults(resp));
+    return scrape(endpoint, xpath).then(parseResults);
   },
 
   getStores: () => {
     var endpoint = '/stores';
-    var query = YQL("select * from html where url='" + url(endpoint) + "' and xpath='//map/area'");
+    var xpath = '//map/area';
 
     var parseResults = (resp) => {
       var results = resp.query.results;
@@ -111,7 +88,7 @@ var parser = {
       }
     };
 
-    return getResults(query, endpoint).then((resp) => parseResults(resp));
+    return scrape(endpoint, xpath).then(parseResults);
   },
 
   getGeocodedStores: () => {
