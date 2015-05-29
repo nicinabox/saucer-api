@@ -56,7 +56,8 @@ var parser = {
           return {
             id: result.value,
             name: name,
-            container: container
+            container: container,
+            createdOn: new Date().toString(),
           };
         }).sortBy('name').value();
       }

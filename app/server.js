@@ -1,15 +1,41 @@
 'use strict';
 
-var express = require('express');
+var Hapi = require('hapi');
+var Good = require('good');
+var routes = [
+  require('./routes/root'),
+  require('./routes/stores'),
+  require('./routes/nearby'),
+];
+
 var PORT = process.env.PORT || 4567;
-var app = express();
 
-app.use('/', require('./routes'));
+var server = new Hapi.Server();
+server.connection({ port: PORT });
 
-var server = app.listen(PORT, function () {
-  var host = server.address().address;
-  var port = server.address().port;
+routes.forEach(function(set) {
+  set.forEach(function(route) {
+    server.route(route);
+  });
+});
 
-  console.log('Listening at http://%s:%s', host, port);
+server.register({
+  register: Good,
+  options: {
+    reporters: [{
+      reporter: require('good-console'),
+      events: {
+        response: '*',
+        log: '*'
+      }
+    }]
+  }
+}, function (err) {
+  if (err) {
+    throw err;
+  }
 
+  server.start(function () {
+    server.log('info', 'Server running at: ' + server.info.uri);
+  });
 });
