@@ -6,6 +6,7 @@ var routes = [
   require('./routes/root'),
   require('./routes/stores'),
   require('./routes/nearby'),
+  require('./routes/beers'),
 ];
 
 var PORT = process.env.PORT || 4567;
