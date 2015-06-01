@@ -10,8 +10,8 @@ var nearby = [
     var coords = req.query;
 
     if (_.isEmpty(coords)) {
-      reply('You must specify latitude and logitude.')
-        .code(400);
+      reply('You must specify latitude and logitude.').code(400);
+      return;
     }
 
     parser.parseStores()
