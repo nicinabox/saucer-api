@@ -14,7 +14,8 @@ var nearby = [
         .code(400);
     }
 
-    parser.getGeocodedStores().then(function (results) {
+    parser.parseStores()
+    .then(function (results) {
       var lastDistance = 99999999;
       var closest = {};
 
