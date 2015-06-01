@@ -18,6 +18,12 @@ describe('parser', function () {
       .returns(support.scrapeResponse('beers/519'));
   });
 
+  after(function () {
+    scraper.getAllStores.restore();
+    scraper.getAllBeersForStore.restore();
+    scraper.getBeerDetails.restore();
+  });
+
   it('parses all stores', function () {
     return parser.parseStores()
     .then((stores) => {

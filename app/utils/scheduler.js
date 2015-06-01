@@ -6,7 +6,7 @@ var moment = require('moment');
 
 var scheduler = {
   saveStores: () => {
-    return parser.getStores()
+    return parser.parseStores()
     .then((result) => {
       return db.set('stores', result);
     })
@@ -15,11 +15,11 @@ var scheduler = {
     });
   },
 
-  saveBeers: () => {
+  saveStoresBeersByDay: () => {
     return db.get('stores')
     .then((stores) => {
       return Promise.all(stores.map((store) => {
-        return parser.getBeerList(store.slug)
+        return parser.parseBeerForStore(store.slug)
           .then((beers) => {
             return [store, beers];
           });
