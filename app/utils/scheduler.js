@@ -19,7 +19,7 @@ var scheduler = {
     return db.get('stores')
     .then((stores) => {
       return Promise.all(stores.map((store) => {
-        return parser.parseBeerForStore(store.slug)
+        return parser.parseBeersForStore(store.slug)
           .then((beers) => {
             return [store, beers];
           });
@@ -36,18 +36,6 @@ var scheduler = {
       console.log(err);
     });
   },
-
-  saveGeocodedStores: () => {
-    return parser.parseStores()
-    .then(parser.geocodeStores)
-    .then((results) => {
-      db.set('geocoded-stores', results);
-      return results;
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  }
 };
 
 module.exports = scheduler;

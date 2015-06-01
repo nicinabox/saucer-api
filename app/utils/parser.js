@@ -3,24 +3,47 @@
 var _ = require('lodash');
 var geocoder = require('node-geocoder')('openstreetmap', 'http', {});
 var scraper = require('./scraper');
+var db = require('./db');
 
 var parser = {
   parseStores: () => {
-    return scraper.getAllStores()
-    .then((resp) => {
-      var results = resp.query.results;
+    return db.get('geocoded-stores')
+    .then((stores) => {
+      if (stores) {
+        return stores;
+      } else {
+        return scraper.getAllStores()
+        .then((resp) => {
+          var results = resp.query.results;
 
-      if (results) {
-        return _(results.area).map((row) => {
-          var slug = row.href.replace(/\/$/, '');
-          var name = row.title.replace('Flying Saucer - ', '');
-          return { slug: slug, name: name };
-        }).sortBy('name').value();
+          if (results) {
+            return _(results.area).map((row) => {
+              var slug = row.href.replace(/\/$/, '');
+              var name = row.title.replace('Flying Saucer - ', '');
+              return { slug: slug, name: name };
+            }).sortBy('name').value();
+          }
+        })
+        .then(parser.geocodeStores)
+        .then((results) => {
+          return db.set('geocoded-stores', results);
+        });
       }
     });
+
   },
 
-  parseBeerForStore: (slug) => {
+  geocodeStores: (stores) => {
+    return Promise.all(stores.map((store) => {
+      return parser.parseStoreLocation(store)
+      .then((location) => {
+        store.location = location;
+        return store;
+      });
+    }));
+  },
+
+  parseBeersForStore: (slug) => {
     var containers = {
       BTL: 'bottle',
       CAN: 'can',
@@ -53,13 +76,13 @@ var parser = {
   parseBeerDetails: (id) => {
     return scraper.getBeerDetails(id)
     .then((resp) => {
-      var results = {},
-          _results = resp.query.results;
+      var details = {},
+          results = resp.query.results;
 
       var falsey = ['None', 'n/a', 'unassigned', ''];
 
-      if (_results) {
-        results = _(_results.tr).map((row) => {
+      if (results) {
+        details = _(results.tr).map((row) => {
           if (_.isArray(row.td) && !_.contains(falsey, row.td[1])) {
             return [
               row.td[0].replace(/:\s?$/, '').toLowerCase(),
@@ -68,21 +91,21 @@ var parser = {
           }
         }).compact().object().value();
 
-        var title = _results.tr[0];
-        results.title = title.td.h3;
+        var title = results.tr[0];
+        details.title = title.td.h3;
 
-        return results;
+        return details;
       }
     });
   },
 
-  geocodeStores: (stores) => {
-    return Promise.all(_.map(stores, (store) => {
-      return geocoder.geocode(store.name).then((resp) => {
-        store.location = resp[0];
-      });
-    }));
-  }
+  parseStoreLocation: (store) => {
+    return geocoder.geocode(store.name)
+    .then((resp) => {
+      return resp[0];
+    })
+    .catch((err) => console.log(err));
+  },
 };
 
 module.exports = parser;
