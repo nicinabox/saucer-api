@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('lodash');
-var geocoder = require('geocoder')('openstreetmap', 'http', {});
+var geocoder = require('node-geocoder')('openstreetmap', 'http', {});
 var scraper = require('./scraper');
 
 var parser = {
