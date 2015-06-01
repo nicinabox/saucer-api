@@ -27,8 +27,9 @@ var nearby = [
         }
       });
 
-      reply(closest);
+      return closest;
     })
+    .then(reply)
     .catch(function (err) {
       reply(err).code(500);
     });
