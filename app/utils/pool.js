@@ -1,38 +1,29 @@
 'use strict';
 
 var RSVP = require('rsvp');
-var fs = require('fs');
+var db = require('./db');
 
-var FILENAME = './tmp/pool.json';
 var CACHE_MINUTES = 60 * 24;
-
-try {
-  fs.mkdirSync('./tmp');
-} catch(e) {}
 
 var keys = {};
 var store = {};
 
-var hydrate = () => {
-  if (fs.existsSync(FILENAME)) {
-    var data = JSON.parse(fs.readFileSync(FILENAME, 'utf-8'));
-    keys = data.keys;
-    store = data.store;
-  }
+var saveData = () => {
+  var data = {
+    keys: keys,
+    store: store
+  };
+
+  return db.set('pool', data);
 };
 
-var saveData = () => {
-  return new RSVP.Promise(((resolve, reject) => {
-    var data = {
-      keys: keys,
-      store: store
-    };
-
-    fs.writeFileSync(FILENAME, JSON.stringify(data), 'utf-8', (error) => {
-      if (error) reject(error);
-      resolve();
-    });
-  }));
+var hydrate = () => {
+  return db.get('pool').then((data) => {
+    if (data) {
+      keys = data.keys;
+      store = data.store;
+    }
+  });
 };
 
 var pool = {
@@ -45,7 +36,7 @@ var pool = {
     };
 
     store[key] = value;
-    saveData();
+    return saveData();
   },
 
   get: (key) => {
