@@ -6,10 +6,8 @@ var router = require('../utils/router');
 var stores = [
   router.get('/stores', function (req, reply) {
     parser.getGeocodedStores()
-    .then(function (results) {
-      reply(results);
-    })
-    .catch(function(err) {
+    .then(reply)
+    .catch((err) => {
       reply(err).code(500);
     });
   }),
@@ -20,9 +18,7 @@ var stores = [
 
   router.get('/stores/{slug}/beers', function (req, reply) {
     parser.getBeerList(req.params.slug)
-    .then(function (results) {
-      reply(results);
-    })
+    .then(reply)
     .catch(function (err) {
       reply(err).code(500);
     });

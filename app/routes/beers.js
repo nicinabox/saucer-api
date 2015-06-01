@@ -6,9 +6,8 @@ var parser = require('../utils/parser');
 var beers = [
   router.get('/beers/{id}', function (req, reply) {
     parser.getBeer(req.params.id)
-    .then(function (results) {
-      reply(results);
-    }).catch(function (err) {
+    .then(reply)
+    .catch(function (err) {
       reply(err).code(500);
     });
   }),
