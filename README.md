@@ -10,7 +10,7 @@ Scraped data is cached for 24 hours.
 
 Returns a list of store locations.
 
-`/stores/nearby`
+`/stores/closest`
 
 Params: `latitude`, `longitude`
 

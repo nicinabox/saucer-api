@@ -15,10 +15,10 @@ var stores = [
   }),
 
   router.get('/stores/{id}', function (req, reply) {
-    reply('Did you mean "/stores/' + req.params.id + '/beers"?');
+    reply('Did you mean "/stores/' + req.params.id + '/beers"?').code(400);
   }),
 
-  router.get('/stores/nearby', function (req, reply) {
+  router.get('/stores/closest', function (req, reply) {
     var coords = req.query;
 
     if (_.isEmpty(coords)) {
