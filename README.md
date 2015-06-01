@@ -6,15 +6,15 @@ Scraped data is cached for 24 hours.
 
 ## Routes
 
-`/nearby`
+`/stores`
+
+Returns a list of store locations.
+
+`/stores/nearby`
 
 Params: `latitude`, `longitude`
 
 Returns the closest store location.
-
-`/stores`
-
-Returns a list of store locations.
 
 `/stores/:slug/beers`
 
