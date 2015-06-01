@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --harmony",
     "start": "node --harmony index.js",
     "watch": "nodemon --harmony index.js"
   },
@@ -21,5 +21,9 @@
     "node-geocoder": "^2.20.0",
     "rsvp": "^3.0.18",
     "yql": "^1.0.2"
+  },
+  "devDependencies": {
+    "expect": "^1.6.0",
+    "sinon": "^1.14.1"
   }
 }
