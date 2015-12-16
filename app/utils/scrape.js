@@ -23,11 +23,13 @@ var scrape = (endpoint, xpath) => {
     if (cache) {
       return cache;
     } else {
-      query.exec((err, resp) => {
-        if (err) { throw err; }
+      return new Promise((resolve) => {
+        query.exec((err, resp) => {
+          if (err) { throw err; }
 
-        pool.set(endpoint, resp);
-        return resp;
+          pool.set(endpoint, resp);
+          resolve(resp);
+        });
       });
     }
   });

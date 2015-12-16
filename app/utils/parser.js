@@ -1,24 +1,56 @@
 'use strict';
 
 var _ = require('lodash');
-var RSVP = require('rsvp');
 var geocoder = require('node-geocoder')('openstreetmap', 'http', {});
-
-var pool = require('./pool');
-var scrape = require('./scrape');
-
-var containers = {
-  BTL: 'bottle',
-  CAN: 'can',
-  CASK: 'cask',
-};
+var scraper = require('./scraper');
+var db = require('./db');
 
 var parser = {
-  getBeerList: (id) => {
-    var endpoint = '/stores/' + id + '/beer';
-    var xpath = '//select[@id="brews"]/option';
+  parseStores: () => {
+    return db.get('geocoded-stores')
+    .then((stores) => {
+      if (stores) {
+        return stores;
+      } else {
+        return scraper.getAllStores()
+        .then((resp) => {
+          var results = resp.query.results;
 
-    var parseResults = (resp) => {
+          if (results) {
+            return _(results.area).map((row) => {
+              var slug = row.href.replace(/\/$/, '');
+              var name = row.title.replace('Flying Saucer - ', '');
+              return { slug: slug, name: name };
+            }).sortBy('name').value();
+          }
+        })
+        .then(parser.geocodeStores)
+        .then((results) => {
+          return db.set('geocoded-stores', results);
+        });
+      }
+    });
+  },
+
+  geocodeStores: (stores) => {
+    return Promise.all(stores.map((store) => {
+      return parser.parseStoreLocation(store)
+      .then((location) => {
+        store.location = location;
+        return store;
+      });
+    }));
+  },
+
+  parseBeersForStore: (slug) => {
+    var containers = {
+      BTL: 'bottle',
+      CAN: 'can',
+      CASK: 'cask',
+    };
+
+    return scraper.getAllBeersForStore(slug)
+    .then((resp) => {
       var results = resp.query.results;
 
       if (results) {
@@ -37,23 +69,19 @@ var parser = {
           };
         }).sortBy('name').value();
       }
-    };
-
-    return scrape(endpoint, xpath).then(parseResults);
+    });
   },
 
-  getBeer: (id) => {
-    var endpoint = '/store.beers.process.php?brew=' + id;
-    var xpath = '//div[@id="brew_detail_div"]/table//tr';
-
-    var parseResults = (resp) => {
-      var results = {},
-          _results = resp.query.results;
+  parseBeerDetails: (id) => {
+    return scraper.getBeerDetails(id)
+    .then((resp) => {
+      var details = {},
+          results = resp.query.results;
 
       var falsey = ['None', 'n/a', 'unassigned', ''];
 
-      if (_results) {
-        results = _(_results.tr).map((row) => {
+      if (results) {
+        details = _(results.tr).map((row) => {
           if (_.isArray(row.td) && !_.contains(falsey, row.td[1])) {
             return [
               row.td[0].replace(/:\s?$/, '').toLowerCase(),
@@ -62,55 +90,21 @@ var parser = {
           }
         }).compact().object().value();
 
-        var title = _results.tr[0];
-        results.title = title.td.h3;
+        var title = results.tr[0];
+        details.title = title.td.h3;
 
-        return results;
+        return details;
       }
-    };
-
-    return scrape(endpoint, xpath).then(parseResults);
+    });
   },
 
-  getStores: () => {
-    var endpoint = '/stores';
-    var xpath = '//map/area';
-
-    var parseResults = (resp) => {
-      var results = resp.query.results;
-
-      if (results) {
-        return _(results.area).map((row) => {
-          var slug = row.href.replace(/\/$/, '');
-          var name = row.title.replace('Flying Saucer - ', '');
-          return { slug: slug, name: name };
-        }).sortBy('name').value();
-      }
-    };
-
-    return scrape(endpoint, xpath).then(parseResults);
+  parseStoreLocation: (store) => {
+    return geocoder.geocode(store.name)
+    .then((resp) => {
+      return resp[0];
+    })
+    .catch((err) => console.log(err));
   },
-
-  getGeocodedStores: () => {
-    return pool.get('geocoded-stores').then(function(cache) {
-      if (cache) {
-        return cache;
-      } else {
-        return this.getStores().then((results) => {
-          var promises = _.map(results, (location) => {
-            return geocoder.geocode(location.name).then((resp) => {
-              location.location = resp[0];
-            });
-          });
-
-          return RSVP.all(promises).then(() => {
-            pool.set('geocoded-stores', results);
-            return results;
-          });
-        });
-      }
-    }.bind(this));
-  }
 };
 
 module.exports = parser;
