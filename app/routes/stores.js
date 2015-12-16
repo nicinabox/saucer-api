@@ -15,14 +15,18 @@ var stores = [
   }),
 
   router.get('/stores/{id}', function (req, reply) {
-    reply('Did you mean "/stores/' + req.params.id + '/beers"?').code(400);
+    reply('Did you mean "/stores/' + req.params.id + '/beers"?')
+      .type('text/plain')
+      .code(400);
   }),
 
   router.get('/stores/closest', function (req, reply) {
     var coords = req.query;
 
     if (_.isEmpty(coords)) {
-      reply('You must specify latitude and logitude.').code(400);
+      reply('You must specify latitude and logitude.')
+        .type('text/plain')
+        .code(400);
       return;
     }
 
