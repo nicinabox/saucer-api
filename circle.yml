@@ -1,5 +1,9 @@
+machine:
+  node:
+    version: 5.2.0
+
 deployment:
-  staging:
+  production:
     branch: master
     heroku:
       appname: saucer-api
