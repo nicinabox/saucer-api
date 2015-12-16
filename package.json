@@ -9,7 +9,7 @@
     "watch": "nodemon --harmony index.js"
   },
   "engines": {
-    "node": "0.12.x"
+    "node": "5.x"
   },
   "author": "",
   "license": "ISC",
