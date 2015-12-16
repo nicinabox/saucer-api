@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "expect": "^1.13.3",
+    "mocha": "^2.3.4",
     "sinon": "^1.17.2"
   }
 }
