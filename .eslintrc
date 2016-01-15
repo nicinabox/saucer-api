@@ -16,7 +16,7 @@
             2,
             "always"
         ],
-        "comma-dangle": false
+        "comma-dangle": 0
     },
     "env": {
         "es6": true,
