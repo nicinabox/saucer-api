@@ -1,7 +1,7 @@
 'use strict';
 
 var Redis = require('ioredis');
-var redis = new Redis();
+var redis = new Redis(process.env.REDIS_URL);
 
 var db = {
   get: (key) => {
