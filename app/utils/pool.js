@@ -50,7 +50,7 @@ var pool = {
       }
 
       if (timestamp >= item.expires) {
-        this.remove(key);
+        pool.remove(key);
         resolve();
       } else {
         resolve(store[key]);
@@ -59,7 +59,7 @@ var pool = {
   },
 
   remove: (key) => {
-    this.expire(key);
+    pool.expire(key);
     delete store[key];
     saveData();
   },
